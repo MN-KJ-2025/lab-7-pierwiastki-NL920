@@ -10,7 +10,7 @@
 import numpy as np
 import numpy.polynomial.polynomial as nppoly
 
-
+# w roots jeden błąd (?)
 def roots_20(coef: np.ndarray) -> tuple[np.ndarray, np.ndarray] | None:
     """Funkcja wyznaczająca miejsca zerowe wielomianu funkcją
     `nppoly.polyroots()`, najpierw lekko zaburzając wejściowe współczynniki 
@@ -25,8 +25,29 @@ def roots_20(coef: np.ndarray) -> tuple[np.ndarray, np.ndarray] | None:
             - Wektor miejsc zerowych (m,).
         Jeżeli dane wejściowe są niepoprawne funkcja zwraca `None`.
     """
-    pass
-
+    if not isinstance(coef, np.ndarray):
+        return None
+        
+    if coef.ndim != 1:
+        return None
+    
+    # Jeżeli współczynniki mają bardzo duże wartości, przeskaluj je
+    max_coef = np.max(np.abs(coef))
+    if max_coef > 1e10:  # Jeśli współczynniki są bardzo duże
+        coef = coef / max_coef  # Przeskalowanie współczynników
+    
+    # Dodawanie zaburzenia
+    perturbation = np.random.normal(0, 1e-10, len(coef))
+    coefficients_perturbed = coef + perturbation
+    
+    # Wyznaczanie pierwiastków wielomianu
+    try:
+        roots = nppoly.polyroots(coefficients_perturbed)
+    except Exception as e:
+        print(f"Błąd przy wyznaczaniu pierwiastków: {e}")
+        return None
+    
+    return coefficients_perturbed, roots
 
 def frob_a(coef: np.ndarray) -> np.ndarray | None:
     """Funkcja służąca do wyznaczenia macierzy Frobeniusa na podstawie
